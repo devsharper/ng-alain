@@ -1,6 +1,6 @@
 import { MockRequest } from '@delon/mock';
 
-const list = [];
+const list: any[] = [];
 const total = 50;
 
 for (let i = 0; i < total; i += 1) {
@@ -24,34 +24,35 @@ for (let i = 0; i < total; i += 1) {
   });
 }
 
-function genData(params: any) {
+function genData(params: any): { total: number; list: any[] } {
   let ret = [...list];
-  const pi = +params.pi,
-    ps = +params.ps,
-    start = (pi - 1) * ps;
+  const pi = +params.pi;
+  const ps = +params.ps;
+  const start = (pi - 1) * ps;
 
   if (params.no) {
-    ret = ret.filter(data => data.no.indexOf(params.no) > -1);
+    ret = ret.filter((data) => data.no.indexOf(params.no) > -1);
   }
 
   return { total: ret.length, list: ret.slice(start, ps * pi) };
 }
 
-function saveData(id: number, value: any) {
-  const item = list.find(w => w.id === id);
-  if (!item) return { msg: '无效用户信息' };
+function saveData(id: number, value: any): { msg: string } {
+  const item = list.find((w) => w.id === id);
+  if (!item) {
+    return { msg: '无效用户信息' };
+  }
   Object.assign(item, value);
   return { msg: 'ok' };
 }
 
 export const USERS = {
   '/user': (req: MockRequest) => genData(req.queryString),
-  '/user/:id': (req: MockRequest) => list.find(w => w.id === +req.params.id),
+  '/user/:id': (req: MockRequest) => list.find((w) => w.id === +req.params.id),
   'POST /user/:id': (req: MockRequest) => saveData(+req.params.id, req.body),
   '/user/current': {
     name: 'Cipchk',
-    avatar:
-      'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png',
+    avatar: 'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png',
     userid: '00000001',
     email: 'cipchk@qq.com',
     signature: '海纳百川，有容乃大',
@@ -101,10 +102,7 @@ export const USERS = {
   'POST /user/avatar': 'ok',
   'POST /login/account': (req: MockRequest) => {
     const data = req.body;
-    if (
-      !(data.userName === 'admin' || data.userName === 'user') ||
-      data.password !== 'ng-alain.com'
-    ) {
+    if (!(data.userName === 'admin' || data.userName === 'user') || data.password !== 'ng-alain.com') {
       return { msg: `Invalid username or password（admin/ng-alain.com）` };
     }
     return {

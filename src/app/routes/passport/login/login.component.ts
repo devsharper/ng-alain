@@ -1,17 +1,12 @@
-import { SettingsService, _HttpClient } from '@delon/theme';
-import { Component, OnDestroy, Inject, Optional } from '@angular/core';
+import { Component, Inject, OnDestroy, Optional } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { NzMessageService, NzModalService } from 'ng-zorro-antd';
-import {
-  SocialService,
-  SocialOpenType,
-  ITokenService,
-  DA_SERVICE_TOKEN,
-} from '@delon/auth';
-import { ReuseTabService } from '@delon/abc';
-import { environment } from '@env/environment';
 import { StartupService } from '@core';
+import { ReuseTabService } from '@delon/abc/reuse-tab';
+import { DA_SERVICE_TOKEN, ITokenService, SocialOpenType, SocialService } from '@delon/auth';
+import { SettingsService, _HttpClient } from '@delon/theme';
+import { environment } from '@env/environment';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'passport-login',
@@ -20,13 +15,8 @@ import { StartupService } from '@core';
   providers: [SocialService],
 })
 export class UserLoginComponent implements OnDestroy {
-  form: FormGroup;
-  error = '';
-  type = 0;
-
   constructor(
     fb: FormBuilder,
-    modalSrv: NzModalService,
     private router: Router,
     private settingsService: SettingsService,
     private socialService: SocialService,
@@ -39,42 +29,44 @@ export class UserLoginComponent implements OnDestroy {
     public msg: NzMessageService,
   ) {
     this.form = fb.group({
-      userName: [null, [Validators.required, Validators.minLength(4)]],
-      password: [null, Validators.required],
+      userName: [null, [Validators.required, Validators.pattern(/^(admin|user)$/)]],
+      password: [null, [Validators.required, Validators.pattern(/^(ng\-alain\.com)$/)]],
       mobile: [null, [Validators.required, Validators.pattern(/^1\d{10}$/)]],
       captcha: [null, [Validators.required]],
       remember: [true],
     });
-    modalSrv.closeAll();
   }
 
   // #region fields
 
-  get userName() {
+  get userName(): AbstractControl {
     return this.form.controls.userName;
   }
-  get password() {
+  get password(): AbstractControl {
     return this.form.controls.password;
   }
-  get mobile() {
+  get mobile(): AbstractControl {
     return this.form.controls.mobile;
   }
-  get captcha() {
+  get captcha(): AbstractControl {
     return this.form.controls.captcha;
   }
-
-  // #endregion
-
-  switch(ret: any) {
-    this.type = ret.index;
-  }
+  form: FormGroup;
+  error = '';
+  type = 0;
 
   // #region get captcha
 
   count = 0;
   interval$: any;
 
-  getCaptcha() {
+  // #endregion
+
+  switch({ index }: { index: number }): void {
+    this.type = index;
+  }
+
+  getCaptcha(): void {
     if (this.mobile.invalid) {
       this.mobile.markAsDirty({ onlySelf: true });
       this.mobile.updateValueAndValidity({ onlySelf: true });
@@ -83,26 +75,32 @@ export class UserLoginComponent implements OnDestroy {
     this.count = 59;
     this.interval$ = setInterval(() => {
       this.count -= 1;
-      if (this.count <= 0) clearInterval(this.interval$);
+      if (this.count <= 0) {
+        clearInterval(this.interval$);
+      }
     }, 1000);
   }
 
   // #endregion
 
-  submit() {
+  submit(): void {
     this.error = '';
     if (this.type === 0) {
       this.userName.markAsDirty();
       this.userName.updateValueAndValidity();
       this.password.markAsDirty();
       this.password.updateValueAndValidity();
-      if (this.userName.invalid || this.password.invalid) return;
+      if (this.userName.invalid || this.password.invalid) {
+        return;
+      }
     } else {
       this.mobile.markAsDirty();
       this.mobile.updateValueAndValidity();
       this.captcha.markAsDirty();
       this.captcha.updateValueAndValidity();
-      if (this.mobile.invalid || this.captcha.invalid) return;
+      if (this.mobile.invalid || this.captcha.invalid) {
+        return;
+      }
     }
 
     // 默认配置中对所有HTTP请求都会强制 [校验](https://ng-alain.com/auth/getting-started) 用户 Token
@@ -113,7 +111,7 @@ export class UserLoginComponent implements OnDestroy {
         userName: this.userName.value,
         password: this.password.value,
       })
-      .subscribe((res: any) => {
+      .subscribe((res) => {
         if (res.msg !== 'ok') {
           this.error = res.msg;
           return;
@@ -121,11 +119,15 @@ export class UserLoginComponent implements OnDestroy {
         // 清空路由复用信息
         this.reuseTabService.clear();
         // 设置用户Token信息
+        // TODO: Mock expired value
+        res.user.expired = +new Date() + 1000 * 60 * 5;
         this.tokenService.set(res.user);
         // 重新获取 StartupService 内容，我们始终认为应用信息一般都会受当前用户授权范围而影响
         this.startupSrv.load().then(() => {
-          let url = this.tokenService.referrer.url || '/';
-          if (url.includes('/passport')) url = '/';
+          let url = this.tokenService.referrer!.url || '/';
+          if (url.includes('/passport')) {
+            url = '/';
+          }
           this.router.navigateByUrl(url);
         });
       });
@@ -133,9 +135,10 @@ export class UserLoginComponent implements OnDestroy {
 
   // #region social
 
-  open(type: string, openType: SocialOpenType = 'href') {
+  open(type: string, openType: SocialOpenType = 'href'): void {
     let url = ``;
     let callback = ``;
+    // tslint:disable-next-line: prefer-conditional-expression
     if (environment.production) {
       callback = 'https://ng-alain.github.io/ng-alain/#/callback/' + type;
     } else {
@@ -143,9 +146,7 @@ export class UserLoginComponent implements OnDestroy {
     }
     switch (type) {
       case 'auth0':
-        url = `//cipchk.auth0.com/login?client=8gcNydIDzGBYxzqV0Vm1CX_RXH-wsWo5&redirect_uri=${decodeURIComponent(
-          callback,
-        )}`;
+        url = `//cipchk.auth0.com/login?client=8gcNydIDzGBYxzqV0Vm1CX_RXH-wsWo5&redirect_uri=${decodeURIComponent(callback)}`;
         break;
       case 'github':
         url = `//github.com/login/oauth/authorize?client_id=9d6baae4b04a23fcafa2&response_type=code&redirect_uri=${decodeURIComponent(
@@ -153,9 +154,7 @@ export class UserLoginComponent implements OnDestroy {
         )}`;
         break;
       case 'weibo':
-        url = `https://api.weibo.com/oauth2/authorize?client_id=1239507802&response_type=code&redirect_uri=${decodeURIComponent(
-          callback,
-        )}`;
+        url = `https://api.weibo.com/oauth2/authorize?client_id=1239507802&response_type=code&redirect_uri=${decodeURIComponent(callback)}`;
         break;
     }
     if (openType === 'window') {
@@ -163,7 +162,7 @@ export class UserLoginComponent implements OnDestroy {
         .login(url, '/', {
           type: 'window',
         })
-        .subscribe(res => {
+        .subscribe((res) => {
           if (res) {
             this.settingsService.setUser(res);
             this.router.navigateByUrl('/');
@@ -179,6 +178,8 @@ export class UserLoginComponent implements OnDestroy {
   // #endregion
 
   ngOnDestroy(): void {
-    if (this.interval$) clearInterval(this.interval$);
+    if (this.interval$) {
+      clearInterval(this.interval$);
+    }
   }
 }

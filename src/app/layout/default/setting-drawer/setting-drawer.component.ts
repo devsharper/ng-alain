@@ -1,14 +1,9 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  NgZone,
-  Inject,
-  ChangeDetectorRef,
-} from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { NzMessageService } from 'ng-zorro-antd';
-import { LazyService, copy, deepCopy } from '@delon/util';
-import { SettingsService } from '@delon/theme';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, NgZone } from '@angular/core';
+import { Layout, SettingsService } from '@delon/theme';
+import { copy, deepCopy, LazyService } from '@delon/util';
+import { NzSafeAny } from 'ng-zorro-antd/core/types';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 const ALAINDEFAULTVAR = 'alain-default-vars';
 const DEFAULT_COLORS = [
@@ -44,8 +39,12 @@ const DEFAULT_COLORS = [
     key: 'purple',
     color: '#722ED1',
   },
+  {
+    key: 'black',
+    color: '#001529',
+  },
 ];
-const DEFAULT_VARS = {
+const DEFAULT_VARS: { [key: string]: NzSafeAny } = {
   'primary-color': { label: '主颜色', type: 'color', default: '#1890ff' },
   'alain-default-header-hg': {
     label: '高',
@@ -203,6 +202,7 @@ const DEFAULT_VARS = {
   // tslint:disable-next-line:component-selector
   selector: 'setting-drawer',
   templateUrl: './setting-drawer.component.html',
+  // tslint:disable-next-line: no-host-metadata-property
   host: {
     '[class.setting-drawer]': 'true',
   },
@@ -212,7 +212,7 @@ export class SettingDrawerComponent {
   private loadedLess = false;
 
   collapse = false;
-  get layout() {
+  get layout(): Layout {
     return this.settingSrv.layout;
   }
   data: any = {};
@@ -231,18 +231,20 @@ export class SettingDrawerComponent {
     this.resetData(this.cachedData, false);
   }
 
-  private get cachedData() {
+  private get cachedData(): { [key: string]: any } {
     return this.settingSrv.layout[ALAINDEFAULTVAR] || {};
   }
 
-  private get DEFAULT_PRIMARY() {
+  private get DEFAULT_PRIMARY(): string {
     return DEFAULT_VARS['primary-color'].default;
   }
 
   private loadLess(): Promise<void> {
-    if (this.loadedLess) return Promise.resolve();
+    if (this.loadedLess) {
+      return Promise.resolve();
+    }
     return this.lazy
-      .loadStyle('./assets/alain-default.less', 'stylesheet/less')
+      .loadStyle('./assets/color.less', 'stylesheet/less')
       .then(() => {
         const lessConfigNode = this.doc.createElement('script');
         lessConfigNode.innerHTML = `
@@ -254,29 +256,23 @@ export class SettingDrawerComponent {
         `;
         this.doc.body.appendChild(lessConfigNode);
       })
-      .then(() =>
-        this.lazy.loadScript(
-          'https://gw.alipayobjects.com/os/lib/less.js/3.8.1/less.min.js',
-        ),
-      )
+      .then(() => this.lazy.loadScript('https://gw.alipayobjects.com/os/lib/less.js/3.8.1/less.min.js'))
       .then(() => {
         this.loadedLess = true;
       });
   }
 
-  private genVars() {
+  private genVars(): any {
     const { data, color, validKeys } = this;
     const vars: any = {
       [`@primary-color`]: color,
     };
-    validKeys
-      .filter(key => key !== 'primary-color')
-      .forEach(key => (vars[`@${key}`] = data[key].value));
+    validKeys.filter((key) => key !== 'primary-color').forEach((key) => (vars[`@${key}`] = data[key].value));
     this.setLayout(ALAINDEFAULTVAR, vars);
     return vars;
   }
 
-  private runLess() {
+  private runLess(): void {
     const { zone, msg, cdr } = this;
     const msgId = msg.loading(`正在编译主题！`, { nzDuration: 0 }).messageId;
     setTimeout(() => {
@@ -292,27 +288,27 @@ export class SettingDrawerComponent {
     }, 200);
   }
 
-  toggle() {
+  toggle(): void {
     this.collapse = !this.collapse;
   }
 
-  changeColor(color: string) {
+  changeColor(color: string): void {
     this.color = color;
     Object.keys(DEFAULT_VARS)
-      .filter(key => DEFAULT_VARS[key].default === '@primary-color')
-      .forEach(key => delete this.cachedData[`@${key}`]);
+      .filter((key) => DEFAULT_VARS[key].default === '@primary-color')
+      .forEach((key) => delete this.cachedData[`@${key}`]);
     this.resetData(this.cachedData, false);
   }
 
-  setLayout(name: string, value: any) {
+  setLayout(name: string, value: any): void {
     this.settingSrv.setLayout(name, value);
   }
 
-  private resetData(nowData?: Object, run = true) {
+  private resetData(nowData?: { [key: string]: NzSafeAny }, run: boolean = true): void {
     nowData = nowData || {};
     const data = deepCopy(DEFAULT_VARS);
-    Object.keys(data).forEach(key => {
-      const value = nowData[`@${key}`] || data[key].default || '';
+    Object.keys(data).forEach((key) => {
+      const value = nowData![`@${key}`] || data[key].default || '';
       data[key].value = value === `@primary-color` ? this.color : value;
     });
     this.data = data;
@@ -323,25 +319,23 @@ export class SettingDrawerComponent {
   }
 
   private get validKeys(): string[] {
-    return Object.keys(this.data).filter(
-      key => this.data[key].value !== this.data[key].default,
-    );
+    return Object.keys(this.data).filter((key) => this.data[key].value !== this.data[key].default);
   }
 
-  apply() {
+  apply(): void {
     this.runLess();
   }
 
-  reset() {
+  reset(): void {
     this.color = this.DEFAULT_PRIMARY;
     this.settingSrv.setLayout(ALAINDEFAULTVAR, {});
     this.resetData({});
   }
 
-  copyVar() {
+  copyVar(): void {
     const vars = this.genVars();
     const copyContent = Object.keys(vars)
-      .map(key => `${key}: ${vars[key]};`)
+      .map((key) => `${key}: ${vars[key]};`)
       .join('\n');
     copy(copyContent);
     this.msg.success('Copy success');

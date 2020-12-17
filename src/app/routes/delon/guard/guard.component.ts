@@ -1,20 +1,20 @@
-import { MenuService } from '@delon/theme';
-import { Router } from '@angular/router';
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { ACLService } from '@delon/acl';
+import { MenuService } from '@delon/theme';
 
 @Component({
   selector: 'app-guard',
   templateUrl: './guard.component.html',
 })
 export class GuardComponent {
-  constructor(
-    public aclSrv: ACLService,
-    private menuSrv: MenuService,
-    private router: Router,
-  ) {}
+  get data(): any {
+    return this.aclSrv.data;
+  }
 
-  setRole(value: string | boolean) {
+  constructor(private aclSrv: ACLService, private menuSrv: MenuService, private router: Router) {}
+
+  setRole(value: string | boolean): void {
     this.aclSrv.setFull(typeof value === 'boolean' ? value : false);
     this.aclSrv.set({ role: [value as string] });
     this.menuSrv.resume();

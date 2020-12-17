@@ -1,9 +1,6 @@
-import {
-  Component,
-  OnInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { Platform } from '@angular/cdk/platform';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { OnboardingService } from '@delon/abc/onboarding';
 import { _HttpClient } from '@delon/theme';
 
 @Component({
@@ -12,7 +9,7 @@ import { _HttpClient } from '@delon/theme';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardV1Component implements OnInit {
-  todoData: any[] = [
+  todoData = [
     {
       completed: true,
       avatar: '1',
@@ -51,18 +48,32 @@ export class DashboardV1Component implements OnInit {
     },
   ];
 
-  webSite: any[];
-  salesData: any[];
-  offlineChartData: any[];
+  webSite!: any[];
+  salesData!: any[];
+  offlineChartData!: any[];
 
-  constructor(private http: _HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: _HttpClient, private cdr: ChangeDetectorRef, private obSrv: OnboardingService, private platform: Platform) {
+    // TODO: Wait for the page to load
+    setTimeout(() => this.genOnboarding(), 1000);
+  }
 
-  ngOnInit() {
-    this.http.get('/chart').subscribe((res: any) => {
+  ngOnInit(): void {
+    this.http.get('/chart').subscribe((res) => {
       this.webSite = res.visitData.slice(0, 10);
       this.salesData = res.salesData;
       this.offlineChartData = res.offlineChartData;
       this.cdr.detectChanges();
+    });
+  }
+
+  private genOnboarding(): void {
+    const KEY = 'on-boarding';
+    if (!this.platform.isBrowser || localStorage.getItem(KEY) === '1') {
+      return;
+    }
+    this.http.get(`./assets/tmp/on-boarding.json`).subscribe((res) => {
+      this.obSrv.start(res);
+      localStorage.setItem(KEY, '1');
     });
   }
 }

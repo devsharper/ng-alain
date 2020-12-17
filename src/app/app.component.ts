@@ -1,13 +1,13 @@
-import { Component, OnInit, Renderer2, ElementRef } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { TitleService, VERSION as VERSION_ALAIN } from '@delon/theme';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
 import { filter } from 'rxjs/operators';
-import { TitleService } from '@delon/theme';
-import { VERSION as VERSION_ALAIN } from '@delon/theme';
-import { VERSION as VERSION_ZORRO, NzModalService } from 'ng-zorro-antd';
 
 @Component({
   selector: 'app-root',
-  template: `<router-outlet></router-outlet>`,
+  template: ` <router-outlet></router-outlet> `,
 })
 export class AppComponent implements OnInit {
   constructor(
@@ -17,24 +17,14 @@ export class AppComponent implements OnInit {
     private titleSrv: TitleService,
     private modalSrv: NzModalService,
   ) {
-    renderer.setAttribute(
-      el.nativeElement,
-      'ng-alain-version',
-      VERSION_ALAIN.full,
-    );
-    renderer.setAttribute(
-      el.nativeElement,
-      'ng-zorro-version',
-      VERSION_ZORRO.full,
-    );
+    renderer.setAttribute(el.nativeElement, 'ng-alain-version', VERSION_ALAIN.full);
+    renderer.setAttribute(el.nativeElement, 'ng-zorro-version', VERSION_ZORRO.full);
   }
 
-  ngOnInit() {
-    this.router.events
-      .pipe(filter(evt => evt instanceof NavigationEnd))
-      .subscribe(() => {
-        this.titleSrv.setTitle();
-        this.modalSrv.closeAll();
-      });
+  ngOnInit(): void {
+    this.router.events.pipe(filter((evt) => evt instanceof NavigationEnd)).subscribe(() => {
+      this.titleSrv.setTitle();
+      this.modalSrv.closeAll();
+    });
   }
 }

@@ -1,21 +1,29 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { SettingsService } from '@delon/theme';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { App, SettingsService } from '@delon/theme';
 
 @Component({
   selector: 'layout-header',
   templateUrl: './header.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
-  searchToggleStatus: boolean;
+  searchToggleStatus = false;
 
-  constructor(public settings: SettingsService) { }
+  get app(): App {
+    return this.settings.app;
+  }
 
-  toggleCollapsedSidebar() {
+  get collapsed(): boolean {
+    return this.settings.layout.collapsed;
+  }
+
+  constructor(private settings: SettingsService) {}
+
+  toggleCollapsedSidebar(): void {
     this.settings.setLayout('collapsed', !this.settings.layout.collapsed);
   }
 
-  searchToggleChange() {
+  searchToggleChange(): void {
     this.searchToggleStatus = !this.searchToggleStatus;
   }
 }

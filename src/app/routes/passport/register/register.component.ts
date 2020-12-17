@@ -1,13 +1,9 @@
 import { Component, OnDestroy } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import {
-  FormGroup,
-  FormBuilder,
-  Validators,
-  FormControl,
-} from '@angular/forms';
-import { NzMessageService } from 'ng-zorro-antd';
 import { _HttpClient } from '@delon/theme';
+import { NzSafeAny } from 'ng-zorro-antd/core/types';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'passport-register',
@@ -15,6 +11,34 @@ import { _HttpClient } from '@delon/theme';
   styleUrls: ['./register.component.less'],
 })
 export class UserRegisterComponent implements OnDestroy {
+  constructor(fb: FormBuilder, private router: Router, public http: _HttpClient, public msg: NzMessageService) {
+    this.form = fb.group({
+      mail: [null, [Validators.required, Validators.email]],
+      password: [null, [Validators.required, Validators.minLength(6), UserRegisterComponent.checkPassword.bind(this)]],
+      confirm: [null, [Validators.required, Validators.minLength(6), UserRegisterComponent.passwordEquar]],
+      mobilePrefix: ['+86'],
+      mobile: [null, [Validators.required, Validators.pattern(/^1\d{10}$/)]],
+      captcha: [null, [Validators.required]],
+    });
+  }
+
+  // #region fields
+
+  get mail(): AbstractControl {
+    return this.form.controls.mail;
+  }
+  get password(): AbstractControl {
+    return this.form.controls.password;
+  }
+  get confirm(): AbstractControl {
+    return this.form.controls.confirm;
+  }
+  get mobile(): AbstractControl {
+    return this.form.controls.mobile;
+  }
+  get captcha(): AbstractControl {
+    return this.form.controls.captcha;
+  }
   form: FormGroup;
   error = '';
   type = 0;
@@ -27,38 +51,17 @@ export class UserRegisterComponent implements OnDestroy {
     pool: 'exception',
   };
 
-  constructor(
-    fb: FormBuilder,
-    private router: Router,
-    public http: _HttpClient,
-    public msg: NzMessageService,
-  ) {
-    this.form = fb.group({
-      mail: [null, [Validators.required, Validators.email]],
-      password: [
-        null,
-        [
-          Validators.required,
-          Validators.minLength(6),
-          UserRegisterComponent.checkPassword.bind(this),
-        ],
-      ],
-      confirm: [
-        null,
-        [
-          Validators.required,
-          Validators.minLength(6),
-          UserRegisterComponent.passwordEquar,
-        ],
-      ],
-      mobilePrefix: ['+86'],
-      mobile: [null, [Validators.required, Validators.pattern(/^1\d{10}$/)]],
-      captcha: [null, [Validators.required]],
-    });
-  }
+  // #endregion
 
-  static checkPassword(control: FormControl) {
-    if (!control) return null;
+  // #region get captcha
+
+  count = 0;
+  interval$: any;
+
+  static checkPassword(control: FormControl): NzSafeAny {
+    if (!control) {
+      return null;
+    }
     const self: any = this;
     self.visible = !!control.value;
     if (control.value && control.value.length > 9) {
@@ -70,47 +73,21 @@ export class UserRegisterComponent implements OnDestroy {
     }
 
     if (self.visible) {
-      self.progress =
-        control.value.length * 10 > 100 ? 100 : control.value.length * 10;
+      self.progress = control.value.length * 10 > 100 ? 100 : control.value.length * 10;
     }
   }
 
-  static passwordEquar(control: FormControl) {
+  static passwordEquar(control: FormControl): { equar: boolean } | null {
     if (!control || !control.parent) {
       return null;
     }
-    if (control.value !== control.parent.get('password').value) {
+    if (control.value !== control.parent.get('password')!.value) {
       return { equar: true };
     }
     return null;
   }
 
-  // #region fields
-
-  get mail() {
-    return this.form.controls.mail;
-  }
-  get password() {
-    return this.form.controls.password;
-  }
-  get confirm() {
-    return this.form.controls.confirm;
-  }
-  get mobile() {
-    return this.form.controls.mobile;
-  }
-  get captcha() {
-    return this.form.controls.captcha;
-  }
-
-  // #endregion
-
-  // #region get captcha
-
-  count = 0;
-  interval$: any;
-
-  getCaptcha() {
+  getCaptcha(): void {
     if (this.mobile.invalid) {
       this.mobile.markAsDirty({ onlySelf: true });
       this.mobile.updateValueAndValidity({ onlySelf: true });
@@ -119,18 +96,20 @@ export class UserRegisterComponent implements OnDestroy {
     this.count = 59;
     this.interval$ = setInterval(() => {
       this.count -= 1;
-      if (this.count <= 0) clearInterval(this.interval$);
+      if (this.count <= 0) {
+        clearInterval(this.interval$);
+      }
     }, 1000);
   }
 
   // #endregion
 
-  submit() {
+  submit(): void {
     this.error = '';
-    for (const i in this.form.controls) {
-      this.form.controls[i].markAsDirty();
-      this.form.controls[i].updateValueAndValidity();
-    }
+    Object.keys(this.form.controls).forEach((key) => {
+      this.form.controls[key].markAsDirty();
+      this.form.controls[key].updateValueAndValidity();
+    });
     if (this.form.invalid) {
       return;
     }
@@ -144,6 +123,8 @@ export class UserRegisterComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.interval$) clearInterval(this.interval$);
+    if (this.interval$) {
+      clearInterval(this.interval$);
+    }
   }
 }

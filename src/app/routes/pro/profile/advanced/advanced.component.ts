@@ -1,23 +1,23 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { NzMessageService, NzTabChangeEvent } from 'ng-zorro-antd';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { STColumn } from '@delon/abc/st';
 import { _HttpClient } from '@delon/theme';
-import { STColumn } from '@delon/abc';
+import { NzSafeAny } from 'ng-zorro-antd/core/types';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzTabChangeEvent } from 'ng-zorro-antd/tabs';
 
 @Component({
   selector: 'app-profile-advanced',
   templateUrl: './advanced.component.html',
   styleUrls: ['./advanced.component.less'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProProfileAdvancedComponent implements OnInit {
-  list: any[] = [];
-
+  list: Array<{ [key: string]: NzSafeAny }> = [];
   data = {
     advancedOperation1: [],
     advancedOperation2: [],
     advancedOperation3: [],
   };
-
   opColumns: STColumn[] = [
     { title: '操作类型', index: 'type' },
     { title: '操作人', index: 'name' },
@@ -28,15 +28,15 @@ export class ProProfileAdvancedComponent implements OnInit {
 
   constructor(public msg: NzMessageService, private http: _HttpClient, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit() {
-    this.http.get('/profile/advanced').subscribe((res: any) => {
+  ngOnInit(): void {
+    this.http.get('/profile/advanced').subscribe((res) => {
       this.data = res;
       this.change({ index: 0, tab: null });
       this.cdr.detectChanges();
     });
   }
 
-  change(args: NzTabChangeEvent) {
-    this.list = this.data[`advancedOperation${args.index + 1}`];
+  change(args: NzTabChangeEvent): void {
+    this.list = (this.data as NzSafeAny)[`advancedOperation${args.index! + 1}`];
   }
 }

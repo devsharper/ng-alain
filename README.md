@@ -4,15 +4,12 @@
   </a>
 </p>
 
-<h1 align="center">
-Ng Alain
-</h1>
+<h1 align="center">NG-ALAIN</h1>
 
 <div align="center">
-
   Out-of-box UI solution for enterprise applications, Let developers focus on business.
 
-  [![Build Status](https://img.shields.io/travis/ng-alain/ng-alain/master.svg?style=flat-square)](https://travis-ci.org/ng-alain/ng-alain)
+  [![Build Status](https://dev.azure.com/ng-alain/ng-alain/_apis/build/status/ng-alain-CI?branchName=master)](https://dev.azure.com/ng-alain/ng-alain/_build/latest?definitionId=2&branchName=master)
   [![Dependency Status](https://david-dm.org/ng-alain/ng-alain/status.svg?style=flat-square)](https://david-dm.org/ng-alain/ng-alain)
   [![GitHub Release Date](https://img.shields.io/github/release-date/ng-alain/ng-alain.svg?style=flat-square)](https://github.com/ng-alain/ng-alain/releases)
   [![NPM version](https://img.shields.io/npm/v/ng-alain.svg?style=flat-square)](https://www.npmjs.com/package/ng-alain)
@@ -26,26 +23,15 @@ Ng Alain
 
 English | [简体中文](README-zh_CN.md)
 
-## Quick start
+## Quickstart
 
-```bash
-# Make sure you are using the latest version of Angular cli
-ng new demo --style less
-cd demo
-ng add ng-alain
-ng serve
-# or hmr mode
-npm run hmr
-```
-
-> Please refer to [Cli](https://ng-alain.com/cli) for more details.
->
-> [vscode] recommended install [ng-zorro-vscode](https://marketplace.visualstudio.com/items?itemName=cipchk.ng-zorro-vscode) & [ng-alain-vscode](https://marketplace.visualstudio.com/items?itemName=cipchk.ng-alain-vscode) plugins.
+- [Getting Started](https://ng-alain.com/docs/getting-started)
 
 ## Links
 
-+ [Document](https://ng-alain.com)
-+ [DEMO](https://ng-alain.github.io/ng-alain/)
++ [Document](https://ng-alain.com) ([Surge Mirror](https://ng-alain-doc.surge.sh))
++ [@delon Source](https://github.com/ng-alain/delon)
++ [DEMO](https://ng-alain.surge.sh) ([国内镜像](https://ng-alain.gitee.io/))
 
 ## Features
 
@@ -72,6 +58,14 @@ npm run hmr
 ![desktop](https://raw.githubusercontent.com/ng-alain/delon/master/_screenshot/desktop.png)
 ![ipad](https://raw.githubusercontent.com/ng-alain/delon/master/_screenshot/ipad.png)
 ![iphone](https://raw.githubusercontent.com/ng-alain/delon/master/_screenshot/iphone.png)
+
+## Contributing
+
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/ng-alain/ng-alain/pulls)
+
+We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.com/ng-alain/ng-alain/blob/master/CONTRIBUTING.md) first. You can submit any ideas as [pull requests](https://github.com/ng-alain/ng-alain/pulls) or as [GitHub issues](https://github.com/ng-alain/ng-alain/issues).
+
+> If you're new to posting issues, we ask that you read [*How To Ask Questions The Smart Way*](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Ask a Question in Open Source Community](https://github.com/seajs/seajs/issues/545) and [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
 ## Donation
 

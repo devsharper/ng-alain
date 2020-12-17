@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 import { MockRequest } from '@delon/mock';
 
-const list = [];
+const list: any[] = [];
 
 for (let i = 0; i < 46; i += 1) {
   list.push({
@@ -18,13 +18,13 @@ for (let i = 0; i < 46; i += 1) {
     description: '这是一段描述',
     callNo: Math.floor(Math.random() * 1000),
     status: Math.floor(Math.random() * 10) % 4,
-    updatedAt: new Date(`2017-07-${i < 18 ? '0'+(Math.floor(i / 2) + 1) : (Math.floor(i / 2) + 1)}`),
-    createdAt: new Date(`2017-07-${i < 18 ? '0'+(Math.floor(i / 2) + 1) : (Math.floor(i / 2) + 1)}`),
+    updatedAt: new Date(`2017-07-${i < 18 ? '0' + (Math.floor(i / 2) + 1) : Math.floor(i / 2) + 1}`),
+    createdAt: new Date(`2017-07-${i < 18 ? '0' + (Math.floor(i / 2) + 1) : Math.floor(i / 2) + 1}`),
     progress: Math.ceil(Math.random() * 100),
   });
 }
 
-function getRule(params: any) {
+function getRule(params: any): any[] {
   let ret = [...list];
   if (params.sorter) {
     const s = params.sorter.split('_');
@@ -36,23 +36,25 @@ function getRule(params: any) {
     });
   }
   if (params.statusList && params.statusList.length > 0) {
-    ret = ret.filter(data => params.statusList.indexOf(data.status) > -1);
+    ret = ret.filter((data) => params.statusList.indexOf(data.status) > -1);
   }
   if (params.no) {
-    ret = ret.filter(data => data.no.indexOf(params.no) > -1);
+    ret = ret.filter((data) => data.no.indexOf(params.no) > -1);
   }
   return ret;
 }
 
 function removeRule(nos: string): boolean {
-  nos.split(',').forEach(no => {
-    const idx = list.findIndex(w => w.no === no);
-    if (idx !== -1) list.splice(idx, 1);
+  nos.split(',').forEach((no) => {
+    const idx = list.findIndex((w) => w.no === no);
+    if (idx !== -1) {
+      list.splice(idx, 1);
+    }
   });
   return true;
 }
 
-function saveRule(description: string) {
+function saveRule(description: string): void {
   const i = Math.ceil(Math.random() * 10000);
   list.unshift({
     key: i,

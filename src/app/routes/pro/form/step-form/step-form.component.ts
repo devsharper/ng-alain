@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { TransferService } from './transfer.service';
 
 @Component({
@@ -8,9 +8,13 @@ import { TransferService } from './transfer.service';
   providers: [TransferService],
 })
 export class StepFormComponent implements AfterViewInit {
-  constructor(public item: TransferService) {}
+  get item(): TransferService {
+    return this.srv;
+  }
 
-  ngAfterViewInit() {
+  constructor(private srv: TransferService) {}
+
+  ngAfterViewInit(): void {
     console.log('item', this.item);
   }
 }

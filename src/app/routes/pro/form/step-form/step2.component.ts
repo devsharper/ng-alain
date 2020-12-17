@@ -1,43 +1,43 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TransferService } from './transfer.service';
 
 @Component({
   selector: 'app-step2',
   templateUrl: './step2.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Step2Component implements OnInit {
-  form: FormGroup;
+  form!: FormGroup;
   loading = false;
+  get item(): TransferService {
+    return this.srv;
+  }
 
-  constructor(private fb: FormBuilder, public item: TransferService) {}
+  constructor(private fb: FormBuilder, private srv: TransferService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.form = this.fb.group({
-      password: [
-        null,
-        Validators.compose([Validators.required, Validators.minLength(6)]),
-      ],
+      password: [null, Validators.compose([Validators.required, Validators.minLength(6)])],
     });
     this.form.patchValue(this.item);
   }
 
   //#region get form fields
-  get password() {
+  get password(): AbstractControl {
     return this.form.controls.password;
   }
   //#endregion
 
-  _submitForm() {
+  _submitForm(): void {
     this.loading = true;
     setTimeout(() => {
       this.loading = false;
       ++this.item.step;
-    }, 1000 * 2);
+    }, 500);
   }
 
-  prev() {
+  prev(): void {
     --this.item.step;
   }
 }

@@ -1,15 +1,8 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  OnDestroy,
-  AfterViewInit,
-  ElementRef,
-} from '@angular/core';
-import { Router, ActivationEnd } from '@angular/router';
-import { fromEvent, Subscription } from 'rxjs';
-import { filter, debounceTime } from 'rxjs/operators';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy } from '@angular/core';
+import { ActivationEnd, Router } from '@angular/router';
 import { _HttpClient } from '@delon/theme';
+import { fromEvent, Subscription } from 'rxjs';
+import { debounceTime, filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-account-settings',
@@ -18,12 +11,11 @@ import { _HttpClient } from '@delon/theme';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProAccountSettingsComponent implements AfterViewInit, OnDestroy {
-  private resize$: Subscription;
+  private resize$!: Subscription;
   private router$: Subscription;
   mode = 'inline';
-  title: string;
-  user: any;
-  menus: any[] = [
+  title!: string;
+  menus: Array<{ key: string; title: string; selected?: boolean }> = [
     {
       key: 'base',
       title: '基本设置',
@@ -41,30 +33,24 @@ export class ProAccountSettingsComponent implements AfterViewInit, OnDestroy {
       title: '新消息通知',
     },
   ];
-  constructor(
-    private router: Router,
-    private cdr: ChangeDetectorRef,
-    private el: ElementRef,
-  ) {
-    this.router$ = this.router.events
-      .pipe(filter(e => e instanceof ActivationEnd))
-      .subscribe(() => this.setActive());
+  constructor(private router: Router, private cdr: ChangeDetectorRef, private el: ElementRef<HTMLElement>) {
+    this.router$ = this.router.events.pipe(filter((e) => e instanceof ActivationEnd)).subscribe(() => this.setActive());
   }
 
-  private setActive() {
+  private setActive(): void {
     const key = this.router.url.substr(this.router.url.lastIndexOf('/') + 1);
-    this.menus.forEach(i => {
+    this.menus.forEach((i) => {
       i.selected = i.key === key;
     });
-    this.title = this.menus.find(w => w.selected).title;
+    this.title = this.menus.find((w) => w.selected)!.title;
   }
 
-  to(item: any) {
+  to(item: { key: string }): void {
     this.router.navigateByUrl(`/pro/account/settings/${item.key}`);
   }
 
-  private resize() {
-    const el = this.el.nativeElement as HTMLElement;
+  private resize(): void {
+    const el = this.el.nativeElement;
     let mode = 'inline';
     const { offsetWidth } = el;
     if (offsetWidth < 641 && offsetWidth > 400) {

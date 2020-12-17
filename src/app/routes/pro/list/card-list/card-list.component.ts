@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { NzMessageService } from 'ng-zorro-antd';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { _HttpClient } from '@delon/theme';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'app-list-card-list',
@@ -13,21 +13,25 @@ import { _HttpClient } from '@delon/theme';
     `,
   ],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProCardListComponent implements OnInit {
-  list: any[] = [null];
+  list: Array<{ id: number; title: string; avatar: string; description: string } | null> = [null];
 
   loading = true;
 
-  constructor(private http: _HttpClient, public msg: NzMessageService, private cdr: ChangeDetectorRef) {}
+  constructor(private http: _HttpClient, private msg: NzMessageService, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loading = true;
-    this.http.get('/api/list', { count: 8 }).subscribe((res: any) => {
+    this.http.get('/api/list', { count: 8 }).subscribe((res) => {
       this.list = this.list.concat(res);
       this.loading = false;
       this.cdr.detectChanges();
     });
+  }
+
+  show(text: string): void {
+    this.msg.success(text);
   }
 }

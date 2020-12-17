@@ -7,38 +7,38 @@ export class TransferService {
   /**
    * 付款账户
    */
-  pay_account: string;
+  pay_account = '';
 
   /**
    * 收款账户类型
    */
-  receiver_type: 'alipay' | 'bank';
+  receiver_type: 'alipay' | 'bank' = 'alipay';
 
-  get receiver_type_str() {
+  get receiver_type_str(): string {
     return this.receiver_type === 'alipay' ? '支付宝' : '银行';
   }
 
   /**
    * 收款账户
    */
-  receiver_account: string;
+  receiver_account = '';
 
   /**
    * 收款姓名
    */
-  receiver_name: string;
+  receiver_name = '';
 
   /**
    * 金额
    */
-  amount: number;
+  amount = 500;
 
   /**
    * 支付密码
    */
   password = '123456';
 
-  again() {
+  again(): void {
     this.step = 0;
     this.pay_account = 'ant-design@alipay.com';
     this.receiver_type = 'alipay';

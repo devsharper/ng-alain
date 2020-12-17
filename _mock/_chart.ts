@@ -1,38 +1,36 @@
-// tslint:disable
+import format from 'date-fns/format';
 import * as Mock from 'mockjs';
-import { format } from 'date-fns';
-import { deepCopy } from '@delon/util';
 
 // region: mock data
 
-const visitData = [];
+const visitData: any[] = [];
 const beginDay = new Date().getTime();
 
 const fakeY = [7, 5, 4, 2, 4, 7, 5, 6, 5, 9, 6, 3, 1, 5, 3, 6, 5];
 for (let i = 0; i < fakeY.length; i += 1) {
   visitData.push({
-    x: format(new Date(beginDay + 1000 * 60 * 60 * 24 * i), 'YYYY-MM-DD'),
+    x: format(new Date(beginDay + 1000 * 60 * 60 * 24 * i), 'yyyy-MM-dd'),
     y: fakeY[i],
   });
 }
 
-const visitData2 = [];
+const visitData2: any[] = [];
 const fakeY2 = [1, 6, 4, 8, 3, 7, 2];
 for (let i = 0; i < fakeY2.length; i += 1) {
   visitData2.push({
-    x: format(new Date(beginDay + 1000 * 60 * 60 * 24 * i), 'YYYY-MM-DD'),
+    x: format(new Date(beginDay + 1000 * 60 * 60 * 24 * i), 'yyyy-MM-dd'),
     y: fakeY2[i],
   });
 }
 
-const salesData = [];
+const salesData: any[] = [];
 for (let i = 0; i < 12; i += 1) {
   salesData.push({
     x: `${i + 1}月`,
     y: Math.floor(Math.random() * 1000) + 200,
   });
 }
-const searchData = [];
+const searchData: any[] = [];
 for (let i = 0; i < 50; i += 1) {
   searchData.push({
     index: i + 1,
@@ -119,17 +117,17 @@ const salesTypeDataOffline = [
   },
 ];
 
-const offlineData = [];
+const offlineData: any[] = [];
 for (let i = 0; i < 10; i += 1) {
   offlineData.push({
     name: `门店${i}`,
     cvr: Math.ceil(Math.random() * 9) / 10,
   });
 }
-const offlineChartData = [];
+const offlineChartData: any[] = [];
 for (let i = 0; i < 20; i += 1) {
   offlineChartData.push({
-    x: new Date().getTime() + 1000 * 60 * 30 * i,
+    time: new Date().getTime() + 1000 * 60 * 30 * i,
     y1: Math.floor(Math.random() * 100) + 10,
     y2: Math.floor(Math.random() * 100) + 10,
   });
@@ -163,16 +161,16 @@ const radarOriginData = [
 ];
 
 //
-const radarData = [];
-const radarTitleMap = {
+const radarData: any[] = [];
+const radarTitleMap: any = {
   ref: '引用',
   koubei: '口碑',
   output: '产量',
   contribute: '贡献',
   hot: '热度',
 };
-radarOriginData.forEach(item => {
-  Object.keys(item).forEach(key => {
+radarOriginData.forEach((item: any) => {
+  Object.keys(item).forEach((key) => {
     if (key !== 'name') {
       radarData.push({
         name: item.name,
@@ -186,20 +184,22 @@ radarOriginData.forEach(item => {
 // endregion
 
 export const CHARTS = {
-  '/chart': JSON.parse(JSON.stringify({
-    visitData,
-    visitData2,
-    salesData,
-    searchData,
-    offlineData,
-    offlineChartData,
-    salesTypeData,
-    salesTypeDataOnline,
-    salesTypeDataOffline,
-    radarData,
-  })),
+  '/chart': JSON.parse(
+    JSON.stringify({
+      visitData,
+      visitData2,
+      salesData,
+      searchData,
+      offlineData,
+      offlineChartData,
+      salesTypeData,
+      salesTypeDataOnline,
+      salesTypeDataOffline,
+      radarData,
+    }),
+  ),
   '/chart/visit': JSON.parse(JSON.stringify(visitData)),
   '/chart/tags': Mock.mock({
-    'list|100': [{ x: '@city', 'value|1-100': 150, 'category|0-2': 1 }],
+    'list|100': [{ name: '@city', 'value|1-100': 150 }],
   }),
 };

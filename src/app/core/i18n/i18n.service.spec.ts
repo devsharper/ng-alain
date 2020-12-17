@@ -1,7 +1,8 @@
 import { TestBed, TestBedStatic } from '@angular/core/testing';
+import { DelonLocaleService, SettingsService } from '@delon/theme';
 import { TranslateService } from '@ngx-translate/core';
-import { SettingsService, DelonLocaleService } from '@delon/theme';
-import { NzI18nService } from 'ng-zorro-antd';
+import { NzSafeAny } from 'ng-zorro-antd/core/types';
+import { NzI18nService } from 'ng-zorro-antd/i18n';
 import { of } from 'rxjs';
 
 import { I18NService } from './i18n.service';
@@ -9,27 +10,28 @@ import { I18NService } from './i18n.service';
 describe('Service: I18n', () => {
   let injector: TestBedStatic;
   let srv: I18NService;
-  const MockSettingsService = {
+  const MockSettingsService: NzSafeAny = {
     layout: {
-      lang: null
-    }
+      lang: null,
+    },
   };
   const MockNzI18nService = {
-    setLocale: () => {}
+    setLocale: () => {},
+    setDateLocale: () => {},
   };
   const MockDelonLocaleService = {
-    setLocale: () => {}
+    setLocale: () => {},
   };
   const MockTranslateService = {
     getBrowserLang: jasmine.createSpy('getBrowserLang'),
     addLangs: () => {},
     setLocale: () => {},
     getDefaultLang: () => '',
-    use: () => of(),
-    instant: jasmine.createSpy('instant')
+    use: (lang: string) => of(lang),
+    instant: jasmine.createSpy('instant'),
   };
 
-  function genModule() {
+  function genModule(): void {
     injector = TestBed.configureTestingModule({
       providers: [
         I18NService,
@@ -39,28 +41,31 @@ describe('Service: I18n', () => {
         { provide: TranslateService, useValue: MockTranslateService },
       ],
     });
-    srv = injector.get(I18NService);
+    srv = TestBed.inject(I18NService);
   }
 
   it('should working', () => {
+    spyOnProperty(navigator, 'languages').and.returnValue(['zh-CN']);
     genModule();
     expect(srv).toBeTruthy();
     expect(srv.defaultLang).toBe('zh-CN');
+    const t = TestBed.inject(TranslateService);
     srv.fanyi('a');
     srv.fanyi('a', {});
-    const t = injector.get(TranslateService) as TranslateService;
     expect(t.instant).toHaveBeenCalled();
   });
 
   it('should be used layout as default language', () => {
     MockSettingsService.layout.lang = 'en-US';
+    const navSpy = spyOnProperty(navigator, 'languages');
     genModule();
+    expect(navSpy).not.toHaveBeenCalled();
     expect(srv.defaultLang).toBe('en-US');
     MockSettingsService.layout.lang = null;
   });
 
   it('should be used browser as default language', () => {
-    MockTranslateService.getBrowserLang.and.returnValue('zh-TW');
+    spyOnProperty(navigator, 'languages').and.returnValue(['zh-TW']);
     genModule();
     expect(srv.defaultLang).toBe('zh-TW');
   });
@@ -68,7 +73,7 @@ describe('Service: I18n', () => {
   it('should be trigger notify when changed language', () => {
     genModule();
     srv.use('en-US');
-    srv.change.subscribe(lang => {
+    srv.change.subscribe((lang) => {
       expect(lang).toBe('en-US');
     });
   });

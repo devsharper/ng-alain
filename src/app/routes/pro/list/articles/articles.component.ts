@@ -1,16 +1,21 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { _HttpClient } from '@delon/theme';
 
 @Component({
   selector: 'app-list-articles',
   templateUrl: './articles.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProListArticlesComponent implements OnInit {
-  q: any = {
+  // endregion
+
+  constructor(private http: _HttpClient, private cdr: ChangeDetectorRef) {}
+  q = {
     ps: 5,
     categories: [],
     owners: ['zxx'],
+    user: '',
+    rate: '',
   };
 
   list: any[] = [];
@@ -32,14 +37,6 @@ export class ProListArticlesComponent implements OnInit {
     { id: 11, text: '类目十一', value: false },
     { id: 12, text: '类目十二', value: false },
   ];
-
-  changeCategory(status: boolean, idx: number) {
-    if (idx === 0) {
-      this.categories.map(i => (i.value = status));
-    } else {
-      this.categories[idx].value = status;
-    }
-  }
   // endregion
 
   // region: owners
@@ -66,22 +63,27 @@ export class ProListArticlesComponent implements OnInit {
     },
   ];
 
-  setOwner() {
+  changeCategory(status: boolean, idx: number): void {
+    if (idx === 0) {
+      this.categories.map((i) => (i.value = status));
+    } else {
+      this.categories[idx].value = status;
+    }
+  }
+
+  setOwner(): void {
     this.q.owners = [`wzj`];
     // TODO: wait nz-dropdown OnPush mode
     setTimeout(() => this.cdr.detectChanges());
   }
-  // endregion
 
-  constructor(private http: _HttpClient, private cdr: ChangeDetectorRef) {}
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.getData();
   }
 
-  getData(more = false) {
+  getData(more: boolean = false): void {
     this.loading = true;
-    this.http.get('/api/list', { count: this.q.ps }).subscribe((res: any) => {
+    this.http.get('/api/list', { count: this.q.ps }).subscribe((res) => {
       this.list = more ? this.list.concat(res) : res;
       this.loading = false;
       this.cdr.detectChanges();

@@ -1,46 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { ZipService } from '@delon/abc';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ZipService } from '@delon/abc/zip';
 import * as JSZip from 'jszip';
-import { NzMessageService } from 'ng-zorro-antd';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'app-zip',
   templateUrl: './zip.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ZipComponent {
-  constructor(private zip: ZipService, private msg: NzMessageService) {
-    this.zip.create().then(ret => (this.instance = ret));
-  }
-
-  // region: read
-
+export class ZipComponent implements OnInit {
   list: any;
-  private format(data: any) {
-    const files = data.files;
-    this.list = Object.keys(files).map(key => {
-      return {
-        name: key,
-        dir: files[key].dir,
-        date: files[key].date,
-      };
-    });
-  }
-
-  url() {
-    this.zip.read(`./assets/tmp/demo.zip`).then(res => this.format(res));
-  }
-
-  change(e: Event) {
-    const file = (e.target as HTMLInputElement).files[0];
-    this.zip.read(file).then(res => this.format(res));
-  }
-
-  // endregion
-
-  // region: write
-
-  instance: JSZip = null;
-  data: { path: string; url: string }[] = [
+  instance: JSZip | null = null;
+  data: { path?: string; url?: string }[] = [
     { path: 'demo.docx', url: 'https://ng-alain.com/assets/demo.docx' },
     {
       path: '小程序标志.zip',
@@ -48,10 +19,40 @@ export class ZipComponent {
     },
   ];
 
-  download() {
-    const promises: Promise<any>[] = [];
-    this.data.forEach(item => {
-      promises.push(this.zip.pushUrl(this.instance, item.path, item.url));
+  constructor(private zip: ZipService, private msg: NzMessageService, private cdr: ChangeDetectorRef) {}
+
+  ngOnInit(): void {
+    this.zip.create().then((ret) => {
+      this.instance = ret;
+      this.cdr.detectChanges();
+    });
+  }
+
+  private format(data: any): void {
+    const files = data.files;
+    this.list = Object.keys(files).map((key) => {
+      return {
+        name: key,
+        dir: files[key].dir,
+        date: files[key].date,
+      };
+    });
+    this.cdr.detectChanges();
+  }
+
+  url(): void {
+    this.zip.read(`./assets/tmp/demo.zip`).then((res) => this.format(res));
+  }
+
+  change(e: Event): void {
+    const file = (e.target as HTMLInputElement).files![0];
+    this.zip.read(file).then((res) => this.format(res));
+  }
+
+  download(): void {
+    const promises: Promise<void>[] = [];
+    this.data.forEach((item) => {
+      promises.push(this.zip.pushUrl(this.instance, item.path!, item.url!));
     });
     Promise.all(promises).then(
       () => {
@@ -60,12 +61,10 @@ export class ZipComponent {
           this.data = [];
         });
       },
-      (error: any) => {
+      (error: {}) => {
         console.warn(error);
         this.msg.error(JSON.stringify(error));
       },
     );
   }
-
-  // endregion
 }

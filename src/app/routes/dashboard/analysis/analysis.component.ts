@@ -1,15 +1,10 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  OnInit,
-  ChangeDetectorRef,
-} from '@angular/core';
-import { NzMessageService } from 'ng-zorro-antd';
-import { STColumn } from '@delon/abc';
-import { getTimeDistance } from '@delon/util';
-import { _HttpClient } from '@delon/theme';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { I18NService } from '@core';
+import { STColumn } from '@delon/abc/st';
+import { _HttpClient } from '@delon/theme';
+import { deepCopy, getTimeDistance } from '@delon/util';
 import { yuan } from '@shared';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'app-dashboard-analysis',
@@ -18,12 +13,13 @@ import { yuan } from '@shared';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardAnalysisComponent implements OnInit {
+  constructor(private http: _HttpClient, public msg: NzMessageService, private i18n: I18NService, private cdr: ChangeDetectorRef) {}
   data: any = {};
   loading = true;
   date_range: Date[] = [];
-  rankingListData: any[] = Array(7)
+  rankingListData: Array<{ title: string; total: number }> = Array(7)
     .fill({})
-    .map((item, i) => {
+    .map((_, i) => {
       return {
         title: this.i18n.fanyi('app.analysis.test', { no: i }),
         total: 323234,
@@ -34,42 +30,44 @@ export class DashboardAnalysisComponent implements OnInit {
     y2: this.i18n.fanyi('app.analysis.payments'),
   };
   searchColumn: STColumn[] = [
-    { title: '排名', i18n: 'app.analysis.table.rank', index: 'index' },
+    { title: { text: '排名', i18n: 'app.analysis.table.rank' }, index: 'index' },
     {
-      title: '搜索关键词',
-      i18n: 'app.analysis.table.search-keyword',
+      title: { text: '搜索关键词', i18n: 'app.analysis.table.search-keyword' },
       index: 'keyword',
-      click: (item: any) => this.msg.success(item.keyword),
+      click: (item) => this.msg.success(item.keyword),
     },
     {
       type: 'number',
-      title: '用户数',
-      i18n: 'app.analysis.table.users',
+      title: { text: '用户数', i18n: 'app.analysis.table.users' },
       index: 'count',
-      sorter: (a, b) => a.count - b.count,
+      sort: {
+        compare: (a, b) => a.count - b.count,
+      },
     },
     {
       type: 'number',
-      title: '周涨幅',
-      i18n: 'app.analysis.table.weekly-range',
+      title: { text: '周涨幅', i18n: 'app.analysis.table.weekly-range' },
       index: 'range',
       render: 'range',
-      sorter: (a, b) => a.range - b.range,
+      sort: {
+        compare: (a, b) => a.range - b.range,
+      },
     },
   ];
 
-  constructor(
-    private http: _HttpClient,
-    public msg: NzMessageService,
-    private i18n: I18NService,
-    private cdr: ChangeDetectorRef,
-  ) {}
+  salesType = 'all';
+  salesPieData: any;
+  salesTotal = 0;
 
-  ngOnInit() {
-    this.http.get('/chart').subscribe((res: any) => {
+  saleTabs: Array<{ key: string; show?: boolean }> = [{ key: 'sales', show: true }, { key: 'visits' }];
+
+  offlineIdx = 0;
+
+  ngOnInit(): void {
+    this.http.get('/chart').subscribe((res) => {
       res.offlineData.forEach((item: any, idx: number) => {
         item.show = idx === 0;
-        item.chart = Object.assign([], res.offlineChartData);
+        item.chart = deepCopy(res.offlineChartData);
       });
       this.data = res;
       this.loading = false;
@@ -77,15 +75,11 @@ export class DashboardAnalysisComponent implements OnInit {
     });
   }
 
-  setDate(type: any) {
+  setDate(type: 'today' | 'week' | 'month' | 'year'): void {
     this.date_range = getTimeDistance(type);
     setTimeout(() => this.cdr.detectChanges());
   }
-
-  salesType = 'all';
-  salesPieData: any;
-  salesTotal = 0;
-  changeSaleType() {
+  changeSaleType(): void {
     this.salesPieData =
       this.salesType === 'all'
         ? this.data.salesTypeData
@@ -93,28 +87,21 @@ export class DashboardAnalysisComponent implements OnInit {
         ? this.data.salesTypeDataOnline
         : this.data.salesTypeDataOffline;
     if (this.salesPieData) {
-      this.salesTotal = this.salesPieData.reduce((pre, now) => now.y + pre, 0);
+      this.salesTotal = this.salesPieData.reduce((pre: number, now: { y: number }) => now.y + pre, 0);
     }
     this.cdr.detectChanges();
   }
 
-  handlePieValueFormat(value: any) {
+  handlePieValueFormat(value: string | number): string {
     return yuan(value);
   }
-
-  saleTabs: any[] = [
-    { key: 'sales', show: true },
-    { key: 'visits' },
-  ];
-  salesChange(idx: number) {
+  salesChange(idx: number): void {
     if (this.saleTabs[idx].show !== true) {
       this.saleTabs[idx].show = true;
       this.cdr.detectChanges();
     }
   }
-
-  offlineIdx = 0;
-  offlineChange(idx: number) {
+  offlineChange(idx: number): void {
     if (this.data.offlineData[idx].show !== true) {
       this.data.offlineData[idx].show = true;
       this.cdr.detectChanges();

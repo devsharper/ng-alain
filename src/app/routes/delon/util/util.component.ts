@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { NzMessageService } from 'ng-zorro-antd';
 import { copy, format } from '@delon/util';
 import { yuan } from '@shared';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'app-util',
@@ -12,10 +12,23 @@ export class UtilComponent {
 
   // region: string
 
+  // tslint:disable-next-line: no-invalid-template-strings
   format_str = 'this is ${name}';
   format_res = '';
   format_obj = JSON.stringify({ name: 'asdf' });
-  onFormat() {
+
+  // yuan
+  yuan_str: any;
+  yuan_res!: string;
+
+  // endregion
+
+  // region: other
+
+  content = `time ${+new Date()}
+
+    中文！@#￥%……&*`;
+  onFormat(): void {
     let obj = null;
     try {
       obj = JSON.parse(this.format_obj);
@@ -25,22 +38,10 @@ export class UtilComponent {
     }
     this.format_res = format(this.format_str, obj, true);
   }
-
-  // yuan
-  yuan_str: any;
-  yuan_res: string;
-  onYuan(value: string) {
+  onYuan(value: string): void {
     this.yuan_res = yuan(value);
   }
-
-  // endregion
-
-  // region: other
-
-  content = `time ${+new Date()}
-
-    中文！@#￥%……&*`;
-  onCopy() {
+  onCopy(): void {
     copy(`time ${+new Date()}`).then(() => this.messageSrv.success(`success`));
   }
 

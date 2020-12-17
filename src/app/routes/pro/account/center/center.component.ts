@@ -1,16 +1,8 @@
-import {
-  Component,
-  OnInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  ViewChild,
-  ElementRef,
-  OnDestroy,
-} from '@angular/core';
-import { Router, ActivationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivationEnd, Router } from '@angular/router';
 import { _HttpClient } from '@delon/theme';
-import { zip, Subscription } from 'rxjs';
+import { Subscription, zip } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-account-center',
@@ -19,10 +11,12 @@ import { zip, Subscription } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProAccountCenterComponent implements OnInit, OnDestroy {
-  private router$: Subscription;
+  constructor(private router: Router, private http: _HttpClient, private cdr: ChangeDetectorRef) {}
+  private router$!: Subscription;
+  @ViewChild('tagInput', { static: false }) private tagInput!: ElementRef<HTMLInputElement>;
   user: any;
   notice: any;
-  tabs: any[] = [
+  tabs = [
     {
       key: 'articles',
       tab: '文章 (8)',
@@ -36,55 +30,40 @@ export class ProAccountCenterComponent implements OnInit, OnDestroy {
       tab: '项目 (8)',
     },
   ];
-
   pos = 0;
+  taging = false;
+  tagValue = '';
 
-  constructor(
-    private router: Router,
-    private http: _HttpClient,
-    private cdr: ChangeDetectorRef,
-  ) {}
-
-  private setActive() {
+  private setActive(): void {
     const key = this.router.url.substr(this.router.url.lastIndexOf('/') + 1);
-    const idx = this.tabs.findIndex(w => w.key === key);
-    if (idx !== -1) this.pos = idx;
+    const idx = this.tabs.findIndex((w) => w.key === key);
+    if (idx !== -1) {
+      this.pos = idx;
+    }
   }
 
   ngOnInit(): void {
-    zip(this.http.get('/user/current'), this.http.get('/api/notice')).subscribe(
-      ([user, notice]) => {
-        this.user = user;
-        this.notice = notice;
-        this.cdr.detectChanges();
-      },
-    );
-    this.router$ = this.router.events
-      .pipe(filter(e => e instanceof ActivationEnd))
-      .subscribe(() => this.setActive());
+    zip(this.http.get('/user/current'), this.http.get('/api/notice')).subscribe(([user, notice]) => {
+      this.user = user;
+      this.notice = notice;
+      this.cdr.detectChanges();
+    });
+    this.router$ = this.router.events.pipe(filter((e) => e instanceof ActivationEnd)).subscribe(() => this.setActive());
     this.setActive();
   }
 
-  to(item: any) {
+  to(item: { key: string }): void {
     this.router.navigateByUrl(`/pro/account/center/${item.key}`);
   }
-
-  taging = false;
-  tagValue = '';
-  @ViewChild('tagInput')
-  private tagInput: ElementRef;
-  tagShowIpt() {
+  tagShowIpt(): void {
     this.taging = true;
     this.cdr.detectChanges();
-    (this.tagInput.nativeElement as HTMLInputElement).focus();
+    this.tagInput.nativeElement.focus();
   }
 
-  tagBlur() {
+  tagBlur(): void {
     const { user, cdr, tagValue } = this;
-    if (
-      tagValue &&
-      user.tags.filter(tag => tag.label === tagValue).length === 0
-    ) {
+    if (tagValue && user.tags.filter((tag: { label: string }) => tag.label === tagValue).length === 0) {
       user.tags.push({ label: tagValue });
     }
     this.tagValue = '';
@@ -92,11 +71,14 @@ export class ProAccountCenterComponent implements OnInit, OnDestroy {
     cdr.detectChanges();
   }
 
-  tagEnter(e: KeyboardEvent) {
-    if (e.keyCode === 13) this.tagBlur();
+  tagEnter(e: KeyboardEvent): void {
+    // tslint:disable-next-line: deprecation
+    if (e.keyCode === 13) {
+      this.tagBlur();
+    }
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.router$.unsubscribe();
   }
 }

@@ -1,12 +1,30 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  OnInit,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { _HttpClient } from '@delon/theme';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { zip } from 'rxjs';
-import { NzMessageService } from 'ng-zorro-antd';
+
+interface ProAccountSettingsUser {
+  email: string;
+  name: string;
+  profile: string;
+  country: string;
+  address: string;
+  phone: string;
+  avatar: string;
+  geographic: {
+    province: {
+      key: string;
+    };
+    city: {
+      key: string;
+    };
+  };
+}
+
+interface ProAccountSettingsCity {
+  name: string;
+  id: string;
+}
 
 @Component({
   selector: 'app-account-settings-base',
@@ -15,45 +33,41 @@ import { NzMessageService } from 'ng-zorro-antd';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProAccountSettingsBaseComponent implements OnInit {
+  constructor(private http: _HttpClient, private cdr: ChangeDetectorRef, private msg: NzMessageService) {}
   avatar = '';
   userLoading = true;
-  user: any;
-
-  constructor(
-    private http: _HttpClient,
-    private cdr: ChangeDetectorRef,
-    private msg: NzMessageService,
-  ) {}
-
-  ngOnInit(): void {
-    zip(
-      this.http.get('/user/current'),
-      this.http.get('/geo/province'),
-    ).subscribe(([user, province]: any) => {
-      this.userLoading = false;
-      this.user = user;
-      this.provinces = province;
-      this.choProvince(user.geographic.province.key, false);
-      this.cdr.detectChanges();
-    });
-  }
+  user!: ProAccountSettingsUser;
 
   // #region geo
 
-  provinces: any[] = [];
-  cities: any[] = [];
+  provinces: ProAccountSettingsCity[] = [];
+  cities: ProAccountSettingsCity[] = [];
 
-  choProvince(pid: string, cleanCity = true) {
-    this.http.get(`/geo/${pid}`).subscribe((res: any) => {
+  ngOnInit(): void {
+    zip(this.http.get('/user/current'), this.http.get('/geo/province')).subscribe(
+      ([user, province]: [ProAccountSettingsUser, ProAccountSettingsCity[]]) => {
+        this.userLoading = false;
+        this.user = user;
+        this.provinces = province;
+        this.choProvince(user.geographic.province.key, false);
+        this.cdr.detectChanges();
+      },
+    );
+  }
+
+  choProvince(pid: string, cleanCity: boolean = true): void {
+    this.http.get(`/geo/${pid}`).subscribe((res) => {
       this.cities = res;
-      if (cleanCity) this.user.geographic.city.key = '';
+      if (cleanCity) {
+        this.user.geographic.city.key = '';
+      }
       this.cdr.detectChanges();
     });
   }
 
   // #endregion
 
-  save() {
+  save(): boolean {
     this.msg.success(JSON.stringify(this.user));
     return false;
   }

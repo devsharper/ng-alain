@@ -1,21 +1,29 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { NzMessageService } from 'ng-zorro-antd';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { _HttpClient } from '@delon/theme';
+
+interface ProListApplicationListItem {
+  title: string;
+  avatar: string;
+  activeUser: string | number;
+  newUser: number;
+}
 
 @Component({
   selector: 'app-list-applications',
   templateUrl: './applications.component.html',
   styleUrls: ['./applications.component.less'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProListApplicationsComponent implements OnInit {
-  q: any = {
+  q = {
     ps: 8,
+    user: null,
+    rate: null,
     categories: [],
     owners: ['zxx'],
   };
 
-  list: any[] = [];
+  list: ProListApplicationListItem[] = [];
 
   loading = true;
 
@@ -36,9 +44,9 @@ export class ProListApplicationsComponent implements OnInit {
     { id: 12, text: '类目十二', value: false },
   ];
 
-  changeCategory(status: boolean, idx: number) {
+  changeCategory(status: boolean, idx: number): void {
     if (idx === 0) {
-      this.categories.map(i => (i.value = status));
+      this.categories.map((i) => (i.value = status));
     } else {
       this.categories[idx].value = status;
     }
@@ -46,28 +54,31 @@ export class ProListApplicationsComponent implements OnInit {
   }
   // endregion
 
-  constructor(private http: _HttpClient, public msg: NzMessageService) {}
+  constructor(private http: _HttpClient, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.getData();
   }
 
-  getData() {
+  getData(): void {
     this.loading = true;
-    this.http.get('/api/list', { count: this.q.ps }).subscribe((res: any) => {
-      this.list = res.map(item => {
-        item.activeUser = this.formatWan(item.activeUser);
+    this.http.get('/api/list', { count: this.q.ps }).subscribe((res) => {
+      this.list = res.map((item: ProListApplicationListItem) => {
+        item.activeUser = this.formatWan(item.activeUser as number);
         return item;
       });
       this.loading = false;
+      this.cdr.detectChanges();
     });
   }
 
-  private formatWan(val) {
+  private formatWan(val: number): string | number {
     const v = val * 1;
-    if (!v || isNaN(v)) return '';
+    if (!v || isNaN(v)) {
+      return '';
+    }
 
-    let result = val;
+    let result: number | string = val;
     if (val > 10000) {
       result = Math.floor(val / 10000);
       result = `${result}`;

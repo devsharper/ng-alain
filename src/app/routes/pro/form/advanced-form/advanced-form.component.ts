@@ -1,24 +1,23 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormArray } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-advanced-form',
   templateUrl: './advanced-form.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdvancedFormComponent implements OnInit {
   editIndex = -1;
   editObj = {};
-
-  form: FormGroup;
-  users: any[] = [
+  form!: FormGroup;
+  users: Array<{ value: string; label: string }> = [
     { value: 'xiao', label: '付晓晓' },
     { value: 'mao', label: '周毛毛' },
   ];
 
   constructor(private fb: FormBuilder) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.form = this.fb.group({
       name: [null, [Validators.required]],
       url: [null, [Validators.required]],
@@ -54,7 +53,7 @@ export class AdvancedFormComponent implements OnInit {
         department: 'Sidney No. 1 Lake Park',
       },
     ];
-    userList.forEach(i => {
+    userList.forEach((i) => {
       const field = this.createUser();
       field.patchValue(i);
       this.items.push(field);
@@ -71,60 +70,60 @@ export class AdvancedFormComponent implements OnInit {
   }
 
   //#region get form fields
-  get name() {
+  get name(): AbstractControl {
     return this.form.controls.name;
   }
-  get url() {
+  get url(): AbstractControl {
     return this.form.controls.url;
   }
-  get owner() {
+  get owner(): AbstractControl {
     return this.form.controls.owner;
   }
-  get approver() {
+  get approver(): AbstractControl {
     return this.form.controls.approver;
   }
-  get time_start() {
+  get time_start(): AbstractControl {
     return this.form.controls.time_start;
   }
-  get time_end() {
+  get time_end(): AbstractControl {
     return this.form.controls.time_end;
   }
-  get type() {
+  get type(): AbstractControl {
     return this.form.controls.type;
   }
-  get name2() {
+  get name2(): AbstractControl {
     return this.form.controls.name2;
   }
-  get summary() {
+  get summary(): AbstractControl {
     return this.form.controls.summary;
   }
-  get owner2() {
+  get owner2(): AbstractControl {
     return this.form.controls.owner2;
   }
-  get approver2() {
+  get approver2(): AbstractControl {
     return this.form.controls.approver2;
   }
-  get time() {
+  get time(): AbstractControl {
     return this.form.controls.time;
   }
-  get type2() {
+  get type2(): AbstractControl {
     return this.form.controls.type2;
   }
-  get items() {
+  get items(): FormArray {
     return this.form.controls.items as FormArray;
   }
   //#endregion
 
-  add() {
+  add(): void {
     this.items.push(this.createUser());
     this.edit(this.items.length - 1);
   }
 
-  del(index: number) {
+  del(index: number): void {
     this.items.removeAt(index);
   }
 
-  edit(index: number) {
+  edit(index: number): void {
     if (this.editIndex !== -1 && this.editObj) {
       this.items.at(this.editIndex).patchValue(this.editObj);
     }
@@ -132,13 +131,15 @@ export class AdvancedFormComponent implements OnInit {
     this.editIndex = index;
   }
 
-  save(index: number) {
+  save(index: number): void {
     this.items.at(index).markAsDirty();
-    if (this.items.at(index).invalid) return;
+    if (this.items.at(index).invalid) {
+      return;
+    }
     this.editIndex = -1;
   }
 
-  cancel(index: number) {
+  cancel(index: number): void {
     if (!this.items.at(index).value.key) {
       this.del(index);
     } else {
@@ -147,11 +148,13 @@ export class AdvancedFormComponent implements OnInit {
     this.editIndex = -1;
   }
 
-  _submitForm() {
-    for (const i in this.form.controls) {
-      this.form.controls[i].markAsDirty();
-      this.form.controls[i].updateValueAndValidity();
+  _submitForm(): void {
+    Object.keys(this.form.controls).forEach((key) => {
+      this.form.controls[key].markAsDirty();
+      this.form.controls[key].updateValueAndValidity();
+    });
+    if (this.form.invalid) {
+      return;
     }
-    if (this.form.invalid) return;
   }
 }

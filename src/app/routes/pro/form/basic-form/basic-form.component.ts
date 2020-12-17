@@ -1,14 +1,14 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { NzMessageService } from 'ng-zorro-antd';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'app-basic-form',
   templateUrl: './basic-form.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicFormComponent implements OnInit {
-  form: FormGroup;
+  form!: FormGroup;
   submitting = false;
 
   constructor(private fb: FormBuilder, private msg: NzMessageService, private cdr: ChangeDetectorRef) {}
@@ -27,7 +27,7 @@ export class BasicFormComponent implements OnInit {
     });
   }
 
-  submit() {
+  submit(): void {
     this.submitting = true;
     setTimeout(() => {
       this.submitting = false;

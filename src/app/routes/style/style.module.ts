@@ -1,25 +1,18 @@
 import { NgModule } from '@angular/core';
 import { SharedModule } from '@shared';
 
-import { StyleRoutingModule } from './style-routing.module';
 import { ColorService } from './color.service';
+import { StyleRoutingModule } from './style-routing.module';
 
+import { ColorsComponent } from './colors/colors.component';
 import { GridMasonryComponent } from './gridmasonry/gridmasonry.component';
 import { TypographyComponent } from './typography/typography.component';
-import { ColorsComponent } from './colors/colors.component';
 
-const COMPONENTS = [
-  GridMasonryComponent,
-  TypographyComponent,
-  ColorsComponent,
-];
-
-const COMPONENTS_NOROUNT = [];
+const COMPONENTS = [GridMasonryComponent, TypographyComponent, ColorsComponent];
 
 @NgModule({
   imports: [SharedModule, StyleRoutingModule],
   providers: [ColorService],
-  declarations: [ ...COMPONENTS, ...COMPONENTS_NOROUNT ],
-  entryComponents: COMPONENTS_NOROUNT,
+  declarations: [...COMPONENTS],
 })
 export class StyleModule {}

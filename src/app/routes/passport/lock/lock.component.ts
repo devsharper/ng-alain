@@ -1,30 +1,33 @@
-import { Router } from '@angular/router';
 import { Component, Inject } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { SettingsService } from '@delon/theme';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DA_SERVICE_TOKEN, ITokenService } from '@delon/auth';
+import { SettingsService, User } from '@delon/theme';
 
 @Component({
   selector: 'passport-lock',
   templateUrl: './lock.component.html',
-  styleUrls: [ './lock.component.less' ]
+  styleUrls: ['./lock.component.less'],
 })
 export class UserLockComponent {
   f: FormGroup;
 
+  get user(): User {
+    return this.settings.user;
+  }
+
   constructor(
     fb: FormBuilder,
     @Inject(DA_SERVICE_TOKEN) private tokenService: ITokenService,
-    public settings: SettingsService,
+    private settings: SettingsService,
     private router: Router,
   ) {
-    tokenService.clear();
     this.f = fb.group({
       password: [null, Validators.required],
     });
   }
 
-  submit() {
+  submit(): void {
     // tslint:disable-next-line:forin
     for (const i in this.f.controls) {
       this.f.controls[i].markAsDirty();
@@ -34,7 +37,7 @@ export class UserLockComponent {
       console.log('Valid!');
       console.log(this.f.value);
       this.tokenService.set({
-        token: '123'
+        token: '123',
       });
       this.router.navigate(['dashboard']);
     }

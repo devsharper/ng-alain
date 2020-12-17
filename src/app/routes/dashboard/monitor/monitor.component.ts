@@ -1,13 +1,7 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-} from '@angular/core';
-import { NzMessageService } from 'ng-zorro-antd';
-import { zip } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { _HttpClient } from '@delon/theme';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { zip } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-monitor',
@@ -16,44 +10,21 @@ import { _HttpClient } from '@delon/theme';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardMonitorComponent implements OnInit, OnDestroy {
+  constructor(private http: _HttpClient, public msg: NzMessageService, private cdr: ChangeDetectorRef) {}
   data: any = {};
   tags = [];
   loading = true;
-  q: any = {
+  q = {
     start: null,
     end: null,
   };
-  percent = null;
-
-  constructor(
-    private http: _HttpClient,
-    public msg: NzMessageService,
-    private cdr: ChangeDetectorRef,
-  ) {}
-
-  ngOnInit() {
-    zip(this.http.get('/chart'), this.http.get('/chart/tags')).subscribe(
-      ([res, tags]: [any, any]) => {
-        this.data = res;
-        tags.list[
-          Math.floor(Math.random() * tags.list.length) + 1
-        ].value = 1000;
-        this.tags = tags.list;
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-    );
-
-    // active chart
-    this.refData();
-    this.activeTime$ = setInterval(() => this.refData(), 1000 * 2);
-  }
+  percent: number | null = null;
 
   // region: active chart
 
   activeTime$: any;
 
-  activeData: any[];
+  activeData!: any[];
 
   activeStat = {
     max: 0,
@@ -62,8 +33,22 @@ export class DashboardMonitorComponent implements OnInit, OnDestroy {
     t2: '',
   };
 
-  refData() {
-    const activeData = [];
+  ngOnInit(): void {
+    zip(this.http.get('/chart'), this.http.get('/chart/tags')).subscribe(([res, tags]: [any, any]) => {
+      this.data = res;
+      tags.list[Math.floor(Math.random() * tags.list.length) + 1].value = 1000;
+      this.tags = tags.list;
+      this.loading = false;
+      this.cdr.detectChanges();
+    });
+
+    // active chart
+    this.refData();
+    this.activeTime$ = setInterval(() => this.refData(), 1000 * 2);
+  }
+
+  refData(): void {
+    const activeData: any[] = [];
     for (let i = 0; i < 24; i += 1) {
       activeData.push({
         x: `${i.toString().padStart(2, '0')}:00`,
@@ -83,7 +68,7 @@ export class DashboardMonitorComponent implements OnInit, OnDestroy {
 
   // endregion
 
-  couponFormat(val: any) {
+  couponFormat(val: any): string {
     switch (parseInt(val, 10)) {
       case 20:
         return '差';
@@ -99,6 +84,8 @@ export class DashboardMonitorComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.activeTime$) clearInterval(this.activeTime$);
+    if (this.activeTime$) {
+      clearInterval(this.activeTime$);
+    }
   }
 }

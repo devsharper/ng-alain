@@ -1,6 +1,6 @@
-import { NzMessageService } from 'ng-zorro-antd';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'app-extras-settings',
@@ -19,13 +19,7 @@ export class ExtrasSettingsComponent implements OnInit {
 
   constructor(fb: FormBuilder, public msg: NzMessageService) {
     this.profileForm = fb.group({
-      name: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.pattern(`^[-_a-zA-Z0-9]{4,20}$`),
-        ]),
-      ],
+      name: [null, Validators.compose([Validators.required, Validators.pattern(`^[-_a-zA-Z0-9]{4,20}$`)])],
       email: '',
       bio: [null, Validators.maxLength(160)],
       url: '',
@@ -34,28 +28,31 @@ export class ExtrasSettingsComponent implements OnInit {
     });
   }
 
-  get name() {
-    return this.profileForm.get('name');
+  get name(): AbstractControl {
+    return this.profileForm.get('name')!;
   }
 
-  profileSave(event, value) {
+  profileSave(value: any): void {
     console.log('profile value', value);
   }
 
-  pwdSave() {
+  pwdSave(): void {
     if (!this.pwd.old_password) {
-      return this.msg.error('invalid old password');
+      this.msg.error('invalid old password');
+      return;
     }
     if (!this.pwd.new_password) {
-      return this.msg.error('invalid new password');
+      this.msg.error('invalid new password');
+      return;
     }
     if (!this.pwd.confirm_new_password) {
-      return this.msg.error('invalid confirm new password');
+      this.msg.error('invalid confirm new password');
+      return;
     }
     console.log('pwd value', this.pwd);
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.profileForm.patchValue({
       name: 'cipchk',
       email: 'cipchk@qq.com',

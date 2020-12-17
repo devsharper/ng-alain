@@ -1,11 +1,15 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { SettingsService } from '@delon/theme';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { SettingsService, User } from '@delon/theme';
 
 @Component({
   selector: 'layout-sidebar',
   templateUrl: './sidebar.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
-  constructor(public settings: SettingsService) {}
+  get user(): User {
+    return this.settings.user;
+  }
+
+  constructor(private settings: SettingsService) {}
 }

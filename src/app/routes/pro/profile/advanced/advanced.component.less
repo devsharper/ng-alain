@@ -1,4 +1,4 @@
-@import '~@delon/theme/styles/default';
+@import '~@delon/theme/index';
 :host {
   ::ng-deep {
     @media screen and (max-width: @screen-sm) {
@@ -7,9 +7,9 @@
       }
     }
     .desc {
-      font-size: @font-size-base;
       position: relative;
       left: 38px;
+      font-size: @font-size-base;
       & > div {
         margin-top: 8px;
         margin-bottom: 4px;

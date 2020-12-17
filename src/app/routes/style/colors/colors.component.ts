@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { ColorService } from '../color.service';
 import { copy } from '@delon/util';
-import { NzMessageService } from 'ng-zorro-antd';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { ColorService } from '../color.service';
 
 @Component({
   selector: 'app-colors',
@@ -12,9 +12,18 @@ export class ColorsComponent {
   nums = Array(10)
     .fill(1)
     .map((v, i) => v + i);
-  constructor(public c: ColorService, private msg: NzMessageService) {}
 
-  onCopy(str: string) {
+  get names(): string[] {
+    return this.colorSrv.names;
+  }
+
+  get brands(): string[] {
+    return this.colorSrv.brands;
+  }
+
+  constructor(private colorSrv: ColorService, private msg: NzMessageService) {}
+
+  onCopy(str: string): void {
     copy(str).then(() => this.msg.success(`Copied Success!`));
   }
 }

@@ -4,13 +4,13 @@
   "newProjectRoot": "projects",
   "projects": {
     "ng-alain": {
+      "projectType": "application",
       "root": "",
       "sourceRoot": "src",
-      "projectType": "application",
       "prefix": "app",
       "schematics": {
         "@schematics/angular:component": {
-          "styleext": "less"
+          "style": "less"
         }
       },
       "architect": {
@@ -20,21 +20,25 @@
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "tsConfig": "src/tsconfig.app.json",
+            "tsConfig": "tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
-            "assets": [
-              "src/assets",
-              "src/favicon.ico"
-            ],
-            "styles": [
-              "src/styles.less"
-            ],
-            "scripts": [
-              "node_modules/@antv/g2/dist/g2.min.js",
-              "node_modules/@antv/data-set/dist/data-set.min.js",
-              "node_modules/@antv/g2-plugin-slider/dist/g2-plugin-slider.min.js",
-              "node_modules/ajv/dist/ajv.bundle.js",
-              "node_modules/qrious/dist/qrious.min.js"
+            "assets": ["src/assets", "src/favicon.ico"],
+            "styles": ["src/styles.less"],
+            "scripts": ["node_modules/ajv/dist/ajv.bundle.js", "node_modules/qrious/dist/qrious.min.js"],
+            "allowedCommonJsDependencies": [
+              "@angularclass/hmr",
+              "@ant-design/colors",
+              "@antv/adjust",
+              "@antv/attr",
+              "@antv/component",
+              "@antv/g-base",
+              "@antv/g-canvas",
+              "@antv/g-math",
+              "@antv/g-svg",
+              "@antv/path-util",
+              "@antv/util",
+              "file-saver",
+              "hammerjs"
             ]
           },
           "configurations": {
@@ -58,7 +62,12 @@
                 {
                   "type": "initial",
                   "maximumWarning": "2mb",
-                  "maximumError": "5mb"
+                  "maximumError": "6mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
                 }
               ]
             },
@@ -75,7 +84,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ng-alain:build"
+            "browserTarget": "ng-alain:build",
+            "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {
@@ -97,42 +107,21 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
-            "karmaConfig": "./src/karma.conf.js",
             "polyfills": "src/polyfills.ts",
-            "tsConfig": "src/tsconfig.spec.json",
-            "scripts": [
-              "node_modules/@antv/g2/dist/g2.min.js",
-              "node_modules/@antv/data-set/dist/data-set.min.js",
-              "node_modules/@antv/g2-plugin-slider/dist/g2-plugin-slider.min.js",
-              "node_modules/ajv/dist/ajv.bundle.js",
-              "node_modules/qrious/dist/qrious.min.js"
-            ],
-            "styles": [
-            ],
-            "assets": [
-              "src/assets"
-            ]
+            "karmaConfig": "karma.conf.js",
+            "tsConfig": "tsconfig.spec.json",
+            "scripts": ["node_modules/ajv/dist/ajv.bundle.js", "node_modules/qrious/dist/qrious.min.js"],
+            "styles": [],
+            "assets": ["src/assets"]
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "src/tsconfig.app.json",
-              "src/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "tsConfig": ["tsconfig.app.json", "tsconfig.spec.json", "e2e/tsconfig.json"],
+            "exclude": ["**/node_modules/**"]
           }
-        }
-      }
-    },
-    "ng-alain-e2e": {
-      "root": "e2e/",
-      "projectType": "application",
-      "prefix": "",
-      "architect": {
+        },
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
@@ -143,15 +132,6 @@
             "production": {
               "devServerTarget": "ng-alain:serve:production"
             }
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": "e2e/tsconfig.e2e.json",
-            "exclude": [
-              "**/node_modules/**"
-            ]
           }
         }
       }

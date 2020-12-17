@@ -1,9 +1,6 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { _HttpClient } from '@delon/theme';
+import { NzSafeAny } from 'ng-zorro-antd/core/types';
 
 @Component({
   selector: 'app-account-center-applications',
@@ -15,8 +12,8 @@ export class ProAccountCenterApplicationsComponent {
   listLoading = true;
   list: any[] = [];
   constructor(private http: _HttpClient, private cdr: ChangeDetectorRef) {
-    this.http.get('/api/list', { count: 8 }).subscribe((res: any) => {
-      this.list = res.map(item => {
+    this.http.get('/api/list', { count: 8 }).subscribe((res: NzSafeAny[]) => {
+      this.list = res.map((item) => {
         item.activeUser = this.formatWan(item.activeUser);
         return item;
       });
@@ -25,15 +22,17 @@ export class ProAccountCenterApplicationsComponent {
     });
   }
 
-  private formatWan(val) {
+  private formatWan(val: number): string {
     const v = val * 1;
-    if (!v || isNaN(v)) return '';
+    if (!v || isNaN(v)) {
+      return '';
+    }
 
-    let result = val;
+    let result: string | number = val;
     if (val > 10000) {
       result = Math.floor(val / 10000);
       result = `${result}`;
     }
-    return result;
+    return result.toString();
   }
 }
